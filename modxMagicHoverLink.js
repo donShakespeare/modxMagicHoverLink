@@ -28,8 +28,8 @@ $("head").append(miniCSS);
 tinyMODXselectedID = false;
 $(document).on("mouseenter", "[ext\\:tree-node-id]", function () {
   if($(".mce-useMODX").length){
-    tinyMODXselectedTEXT = $(this).find("a > span").clone().children().remove().end().text();
-    tinyMODXselectedTITLE = $(this).find("a > span").clone().html($(this).find("a > span").attr('qtip')).text();
+    tinyMODXselectedTEXT = $(this).find("a > span").clone().children().remove().end().text().trim();
+    tinyMODXselectedTITLE = $(this).find("a > span").clone().html($(this).find("a > span").attr('qtip')).text().trim();
     tinyMODXselectedID = $(this).find("a > span > span").text().replace(/\D/g,'');
     if(tinyMODXselectedID && tinyMODXselectedTEXT){
       if($(".mce-themChecksURL").attr("aria-checked") == "true"){
@@ -52,8 +52,8 @@ $(document).on("mouseenter", "[ext\\:tree-node-id]", function () {
 
 $(document).on("mouseenter", "div.section > p.x-combo-list-item > a", function () {
   if($(".mce-useMODX").length){
-    tinyMODXselectedTEXT = $(this).clone().children().remove().end().text();
-    tinyMODXselectedTITLE = $(this).parent().next('ol').text()
+    tinyMODXselectedTEXT = $(this).clone().children().remove().end().text().trim();
+    tinyMODXselectedTITLE = $(this).parent().next('ol').text().trim();
     tinyMODXselectedID = $(this).attr('href');
     tinyMODXselectedID = tinyMODXselectedID.split("resource/update&id=");
     tinyMODXselectedID = tinyMODXselectedID[1];
