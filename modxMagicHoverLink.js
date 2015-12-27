@@ -1,5 +1,3 @@
-//replacement to TinyMCE link plugin, for MODX Revolution only
-//forked by donshakespeare
 /**
  * plugin.js
  *
@@ -12,6 +10,19 @@
 
 /*global tinymce:true */
 
+/*replacement to TinyMCE link plugin, for MODX Revolution only
+forked by donshakespeare
+
+modxMagicHoverLink.js
+An ingenious way to use TinyMCE to do the infamous thing called, internal linking. A replacement to the TinyMCE link plugin, backend only. While using pdoTools to populate link_list is great for backend/frontend, some users asked for a little backend magic that harnesses the existing power of MODX; then modxMagicHoverLink was born.
+
+  tinymce.init({
+    external_plugins: {
+      modxMagicHoverLink: "[[++assets_url]]components/tinymcewrapper/tinymceplugins/modxMagicHoverLink.js"
+    },
+    toolbar: "link unlink"
+  });
+*/
 var miniCSS = '<style>.moce-useMODX button{background-image: linear-gradient(to right,#3f4850 0,#365462 46%,#3e5554 60%,#42554d 68%,#573d4e 100%); box-shadow: 0 2px 0 #E4E4E4; color:white!important;}#themChecks{display:none;position:absolute;top:17px;left:140px}.mce-themChecks{display:inline;margin-left:8px !important;}.mce-themChecksMORE{height: 23px !important;width: 20px!important;background: none!important;box-shadow: none!important;border: 0!important;margin-left: 0 !important;text-align: center!important;}.mce-themChecksMORE button{padding:0!important;}</style>';
 $("head").append(miniCSS);
 tinyMODXselectedID = false;
@@ -66,7 +77,7 @@ $(document).on("mouseenter", "div.section > p.x-combo-list-item > a", function (
 })
 
 
-tinymce.PluginManager.add('link', function(editor) {
+tinymce.PluginManager.add('modxMagicHoverLink', function(editor) {
  function createLinkList(callback) {
   return function() {
    var linkList = editor.settings.link_list;
