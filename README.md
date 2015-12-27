@@ -7,7 +7,8 @@ A replacement to the TinyMCE `link` plugin
   tinymce.init({
     external_plugins: {
       modxMagicHoverLink: "[[++assets_url]]components/tinymcewrapper/tinymceplugins/modxMagicHoverLink.js"
-    }
+    },
+    toolbar: "link unlink"
   });
   ```
   In `TinymceWrapper`, to affect all editors at once, call `external_plugins: {...` in your `TinymceWrapperCommonCode` chunk.<br> Or else, make the call in your individual init chunks.
