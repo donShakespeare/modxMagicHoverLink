@@ -3,7 +3,7 @@ An ingenious way to use TinyMCE to do the infamous thing called, internal linkin
 A replacement to the TinyMCE `link` plugin, backend only.
 While using pdoTools to populate *link_list* is great for backend/frontend, some users asked for a little backend magic that harnesses the existing power of MODX; then modxMagicHoverLink was born.
 
-Hover over Resources in Resource Tree, MODX Manager search result, Link List
+Hover over Resources in Resource Tree, MODX Manager search result, Link List (backend/frontend)
 
 #Usage
 ```html
