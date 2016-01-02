@@ -14,7 +14,7 @@ forked by donshakespeare
 modxMagicHoverLink.js
 An ingenious way to use TinyMCE to do the infamous thing called, internal linking. A replacement to the TinyMCE link plugin, backend only. While using pdoTools to populate link_list is great for backend/frontend, some users asked for a little backend magic that harnesses the existing power of MODX; then modxMagicHoverLink was born.
 
-Hover over Resources in Resource Tree, MODX Manager search result, Link List
+Hover over Resources in Resource Tree, MODX Manager search result, Link List (backend/frontend)
 
   tinymce.init({
     external_plugins: {
@@ -29,7 +29,7 @@ var miniCSS = '<style>.moce-useMODX button{background-image: linear-gradient(to 
 $("head").append(miniCSS);
 tinyMODXselectedID = false;
 $(document).on("mouseenter", "[ext\\:tree-node-id]", function() {
-  if ($(".mce-useMODX").length) {
+  if ($(".mce-useMODX").hasClass('useMODXyes')) { 
     var twEasyHover = tinymce.activeEditor.getParam('hoverAddCLASStoTree', true);
     tinyMODXselectedTEXT = $(this).find("a > span").clone().children().remove().end().text().trim();
     tinyMODXselectedTITLE = $(this).find("a > span").clone().html($(this).find("a > span").attr('qtip')).text().trim();
@@ -60,7 +60,7 @@ $(document).on("mouseenter", "[ext\\:tree-node-id]", function() {
 })
 $(document).on("mouseenter", "[class^=mce-tinyMODXLinkList]", function() {
   tinyMODXselectedID = $(this).attr('class');
-  if ($(".mce-useMODX").length && tinyMODXselectedID.indexOf('[[~') > -1) {
+  if ($(".mce-useMODX").hasClass('useMODXyes') && tinyMODXselectedID.indexOf('[[~') > -1) {
     tinyMODXselectedTEXT = $(this).find("span.mce-text").text().trim();
     tinyMODXselectedTITLE = $(this).find("span.mce-text").text().trim();
     tinyMODXselectedID = tinyMODXselectedID.replace(/\D/g, '');
@@ -82,9 +82,9 @@ $(document).on("mouseenter", "[class^=mce-tinyMODXLinkList]", function() {
   }
 })
 $(document).on("mouseenter", "div.section > p.x-combo-list-item > a", function() {
-  if ($(".mce-useMODX").length) {
+  if ($(".mce-useMODX").hasClass('useMODXyes')) {
     tinyMODXselectedTEXT = $(this).clone().children().remove().end().text().trim();
-    tinyMODXselectedTITLE = $(this).parent().next('ol').text().trim();
+    tinyMODXselectedTITLE = ($(this).parent().next('ol').text().trim() || $(this).children('em').text());
     tinyMODXselectedID = $(this).attr('href');
     tinyMODXselectedID = tinyMODXselectedID.split("resource/update&id=");
     tinyMODXselectedID = tinyMODXselectedID[1];
@@ -132,10 +132,10 @@ tinymce.PluginManager.add('modxMagicHoverLink', function(editor) {
         };
         if (item.menu) {
           menuItem.menu = appendItems(item.menu);
-          menuItem.classes = "tinyMODXLinkList" + item.value; //MODX
+          menuItem.classes = "tinyMODXLinkList" + item.value; //MODX (TinyMCE parent/no-parent)
         } else {
           menuItem.value = item.value;
-          // menuItem.classes = "tinyMODXLinkList" + item.value; //MODX
+          menuItem.classes = "tinyMODXLinkList" + item.value; //MODX
           if (itemCallback) {
             itemCallback(menuItem);
           }
@@ -266,6 +266,7 @@ tinymce.PluginManager.add('modxMagicHoverLink', function(editor) {
         linkListCtrl = {
           type: 'listbox',
           label: 'Link list',
+          classes: 'tinyMODXLinkList',
           values: buildListItems(linkList, function(item) {
             if(item.value.indexOf('[[~') == -1){ //MODX
               item.value = editor.convertURL(item.value || item.url, 'href');
@@ -342,27 +343,50 @@ tinymce.PluginManager.add('modxMagicHoverLink', function(editor) {
           tinymce.ui.Factory.create({
             type: 'button',
             text: 'MODX Resources',
-            tooltip: 'Once clicked, HOVER over any MODX Resource in Resource Tree, Search Result Tree and Link List.',
+            tooltip: 'Click to toggle activation. HOVER over any MODX Resource in Resource Tree, Search Result Tree and Link List.',
             classes: 'useMODX',
             active: true,
             style: 'position:absolute;top:10px;left:8px;',
             onPostRender: function() {
               $(".mce-useMODX").on("click", function() {
-                if ($("[ext\\:tree-node-id]").length) {
-                  if ($("#mce-modal-block:hidden").length) {
-                  // if (parseInt($("#modx-leftbar").css('z-index')) < parseInt($("#modx-leftbar").css('z-index')) || $("#modx-leftbar").css('z-index') == 'auto') {
-                    $("#mce-modal-block").show();
-                    // $("#modx-leftbar").css('z-index',parseInt($("#mce-modal-block").css('z-index'))+2);
-                    $("#themChecks").fadeOut('slow');
+                if ($("#modx-leftbar").length || $(".mce-tinyMODXLinkList").length) {
+                  if ($(this).hasClass('useMODXyes')) {
+                    $(this).removeClass('useMODXyes');
+                    $("#themChecks").fadeOut();
+                    if ($("#modx-leftbar").length && $("#mce-modal-block:hidden").length) {
+                      $("#mce-modal-block").show();
+                    }
                   } else {
-                    $("#mce-modal-block").fadeOut();
-                    // $("#modx-leftbar").css('z-index','auto');
-                    $("#themChecks").fadeIn('slow');
+                    $(this).addClass('useMODXyes');
+                    $("#themChecks").fadeIn();
+                    if ($("#modx-leftbar").length && $("#mce-modal-block:visible").length) {
+                      $("#mce-modal-block").fadeOut();
+                    }
                   }
-                } else {
-                  editor.windowManager.alert("You need MODX Manager Resource Tree for this to work")
+                } else{
+                  editor.windowManager.alert("Required: MODX Resource Tree or Link List")
                 }
               })
+              // $(".mce-useMODX").on("click", function() {
+              //   if ($("[ext\\:tree-node-id]").length || $(".mce-tinyMODXLinkList").length) {
+              //     if ($("#mce-modal-block:hidden").length) {
+              //     // if (parseInt($("#modx-leftbar").css('z-index')) < parseInt($("#modx-leftbar").css('z-index')) || $("#modx-leftbar").css('z-index') == 'auto') {
+              //       if($("[ext\\:tree-node-id]").length){
+              //         $("#mce-modal-block").show();
+              //       }
+              //       // $("#modx-leftbar").css('z-index',parseInt($("#mce-modal-block").css('z-index'))+2);
+              //       $("#themChecks").fadeOut('slow');
+              //     } else {
+              //       if($("[ext\\:tree-node-id]").length){
+              //         $("#mce-modal-block").fadeOut();
+              //       }
+              //       // $("#modx-leftbar").css('z-index','auto');
+              //       $("#themChecks").fadeIn('slow');
+              //     }
+              //   } else {
+              //     editor.windowManager.alert("Required: MODX Resource Tree or Link List")
+              //   }
+              // })
             }
           }).renderTo(document.getElementById(thisAppendTo));
           tinymce.ui.Factory.create({
@@ -394,10 +418,14 @@ tinymce.PluginManager.add('modxMagicHoverLink', function(editor) {
               text: 'Use Resource Description',
               classes: 'themChecksMOREdesc',
               onclick: function() {
-                if ($(".mce-themChecksMOREdesc").hasClass("mce-active")) {
-                  $(".mce-themChecksMOREdesc").removeClass("mce-active")
-                } else {
-                  $(".mce-themChecksMOREdesc").addClass("mce-active")
+                if ($("#modx-leftbar").length) {
+                  if ($(".mce-themChecksMOREdesc").hasClass("mce-active")) {
+                    $(".mce-themChecksMOREdesc").removeClass("mce-active")
+                  } else {
+                    $(".mce-themChecksMOREdesc").addClass("mce-active")
+                  }
+                } else{
+                   editor.windowManager.alert("Required: MODX Resource Tree")
                 }
               }
             }]
