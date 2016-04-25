@@ -5,6 +5,10 @@ While using pdoTools to populate *link_list* is great for backend/frontend, some
 
 Hover over Resources in Resource Tree, MODX Manager search result, Link List (backend/frontend)
 
+Full Markdown support for inserting links and images from file browser
+
+Insert MODX internal links with scheme (abs, relative, http, https)
+
 #Usage
 ```html
   tinymce.init({
