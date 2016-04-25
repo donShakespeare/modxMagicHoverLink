@@ -1,5 +1,4 @@
 /**
- * plugin.js
  *
  * Released under LGPL License.
  * Copyright (c) 1999-2015 Ephox Corp. All rights reserved
@@ -8,31 +7,37 @@
  * Contributing: http://www.tinymce.com/contributing
  */
 /*global tinymce:true */
-/*replacement to TinyMCE link plugin, for MODX Revolution only
+/*replacement to TinyMCE link plugin, works also with MODX Revolution Tree
 forked by donshakespeare
 
 modxMagicHoverLink.js
-An ingenious way to use TinyMCE to do the infamous thing called, internal linking. A replacement to the TinyMCE link plugin, backend only. While using pdoTools to populate link_list is great for backend/frontend, some users asked for a little backend magic that harnesses the existing power of MODX; then modxMagicHoverLink was born.
+An ingenious way to use TinyMCE to do the infamous thing called, internal linking. A replacement to the TinyMCE link plugin, backend/frontend. 
+While using pdoTools to populate link_list is great for backend/frontend, some users asked for a little backend magic that harnesses the existing power of MODX; then modxMagicHoverLink was born.
 
 Hover over Resources in Resource Tree, MODX Manager search result, Link List (backend/frontend)
 
+USAGE
   tinymce.init({
     external_plugins: {
       modxMagicHoverLink: "[[++assets_url]]components/tinymcewrapper/tinymceplugins/modxMagicHoverLink.js"
+      //twExoticMarkdownEditor: "[[++assets_url]]components/tinymcewrapper/tinymceplugins/twExoticMarkdownEditor.js" //works flawlessly with this plugin to output Markdown syntax
     },
     toolbar: "link unlink",
     //hoverStripMODXurl:false, //default is true
     //hoverAddCLASStoTree:false //default is true
   });
 */
-var miniCSS = '<style>.moce-useMODX button{background-image: linear-gradient(to right,#3f4850 0,#365462 46%,#3e5554 60%,#42554d 68%,#573d4e 100%); box-shadow: 0 2px 0 #E4E4E4; color:white!important;}#themChecks{display:none;position:absolute;top:17px;left:140px}.mce-themChecks{display:inline;margin-left:8px !important;}.mce-themChecksMORE{height: 23px !important;width: 20px!important;background: none!important;box-shadow: none!important;border: 0!important;margin-left: 0 !important;text-align: center!important;}.mce-themChecksMORE button{padding:0!important;}.twEasyHover{padding-top:20px!important;padding-bottom:20px!important;}.twEasyHover,.twEasyHover *{cursor:default!important;}.twEasyHover:before{content:"";position:absolute;width:100%;height:100%;}</style>';
-$("head").append(miniCSS);
+var miniCSS = '<style id="modxMagicHoverLinkCSS">.moce-useMODX button{background-image: linear-gradient(to right,#3f4850 0,#365462 46%,#3e5554 60%,#42554d 68%,#573d4e 100%); box-shadow: 0 2px 0 #E4E4E4; color:white!important;}#themChecks{display:none;position:absolute;top:17px;left:60px}.mce-themChecks{display:inline;margin-left:8px !important;}.mce-themChecksMORE,.mce-themChecksScMORE{height: 23px !important;width: 20px!important;background: none!important;box-shadow: none!important;border: 0!important;margin-left: 0 !important;text-align: center!important;}.mce-themChecksMORE button,.mce-themChecksScMORE button{padding:0!important;}.twEasyHover{padding-top:20px!important;padding-bottom:20px!important;}.twEasyHover,.twEasyHover *{cursor:default!important;}.twEasyHover:before{content:"";position:absolute;width:100%;height:100%;}.mce-themChecksIMAGE{position:absolute!important;top:12px!important;z-index:2;}</style>';
+if(!$("#modxMagicHoverLinkCSS").length){
+  $("head").append(miniCSS);
+}
 tinyMODXselectedID = false;
 $(document).on("mouseenter", "[ext\\:tree-node-id]", function() {
   if ($(".mce-useMODX").hasClass('useMODXyes')) { 
     var twEasyHover = tinymce.activeEditor.getParam('hoverAddCLASStoTree', true);
     tinyMODXselectedTEXT = $(this).find("a > span").clone().children().remove().end().text().trim();
     tinyMODXselectedTITLE = $(this).find("a > span").clone().html($(this).find("a > span").attr('qtip')).text().trim();
+    var tinyMODXselectedSCH = $("[class^=mce-themChecksMORE].mce-active").attr("scheme") ? '? &scheme=`'+$("[class^=mce-themChecksMORE].mce-active").attr("scheme")+'`' : '';
     tinyMODXselectedID = $(this).find("a > span > span").text().replace(/\D/g, '');
     if (tinyMODXselectedID && tinyMODXselectedTEXT) {
       if ($(".mce-themChecksURL").attr("aria-checked") == "true" || $(".mce-themChecksTXT").attr("aria-checked") == "true" || $(".mce-themChecksTITLE").attr("aria-checked") == "true") {
@@ -41,7 +46,7 @@ $(document).on("mouseenter", "[ext\\:tree-node-id]", function() {
         }
       }
       if ($(".mce-themChecksURL").attr("aria-checked") == "true") {
-        $(".mce-modxUrl input.mce-textbox").val("[[~" + tinyMODXselectedID + "]]");
+        $(".mce-modxUrl input.mce-textbox").val("[[~" + tinyMODXselectedID + tinyMODXselectedSCH + "]]");
       }
       if ($(".mce-themChecksTXT").attr("aria-checked") == "true") {
         $(".mce-tinyMODXselected").val(tinyMODXselectedTEXT);
@@ -63,10 +68,11 @@ $(document).on("mouseenter", "[class^=mce-tinyMODXLinkList]", function() {
   if ($(".mce-useMODX").hasClass('useMODXyes') && tinyMODXselectedID.indexOf('[[~') > -1) {
     tinyMODXselectedTEXT = $(this).find("span.mce-text").text().trim();
     tinyMODXselectedTITLE = $(this).find("span.mce-text").text().trim();
+    var tinyMODXselectedSCH = $("[class^=mce-themChecksMORE].mce-active").attr("scheme") ? '? &scheme=`'+$("[class^=mce-themChecksMORE].mce-active").attr("scheme")+'`' : '';
     tinyMODXselectedID = tinyMODXselectedID.replace(/\D/g, '');
     if (tinyMODXselectedID && tinyMODXselectedTEXT) {
       if ($(".mce-themChecksURL:visible").length && $(".mce-themChecksURL").attr("aria-checked") == "true") {
-        $(".mce-modxUrl input.mce-textbox").val("[[~" + tinyMODXselectedID + "]]");
+        $(".mce-modxUrl input.mce-textbox").val("[[~" + tinyMODXselectedID + tinyMODXselectedSCH + "]]");
       }
       if ($(".mce-themChecksTXT").attr("aria-checked") == "true") {
         $(".mce-tinyMODXselected").val(tinyMODXselectedTEXT);
@@ -87,10 +93,11 @@ $(document).on("mouseenter", "div.section > p.x-combo-list-item > a", function()
     tinyMODXselectedTITLE = ($(this).parent().next('ol').text().trim() || $(this).children('em').text());
     tinyMODXselectedID = $(this).attr('href');
     tinyMODXselectedID = tinyMODXselectedID.split("resource/update&id=");
+    var tinyMODXselectedSCH = $("[class^=mce-themChecksMORE].mce-active").attr("scheme") ? '? &scheme=`'+$("[class^=mce-themChecksMORE].mce-active").attr("scheme")+'`' : '';
     tinyMODXselectedID = tinyMODXselectedID[1];
     if (tinyMODXselectedID && tinyMODXselectedTEXT) {
       if ($(".mce-themChecksURL").attr("aria-checked") == "true") {
-        $(".mce-modxUrl input.mce-textbox").val("[[~" + tinyMODXselectedID + "]]");
+        $(".mce-modxUrl input.mce-textbox").val("[[~" + tinyMODXselectedID + tinyMODXselectedSCH +"]]");
       }
       if ($(".mce-themChecksTXT").attr("aria-checked") == "true") {
         $(".mce-tinyMODXselected").val(tinyMODXselectedTEXT);
@@ -251,12 +258,17 @@ tinymce.PluginManager.add('modxMagicHoverLink', function(editor) {
         data.title = value;
       }
       if (onlyText) {
+        if(editor.getParam("external_plugins",1).twExoticMarkdownEditor){
+          var title = "Text"
+          var tip = "Link Text or Image Description (ALT)"
+        }
         textListCtrl = {
           name: 'text',
           classes: 'tinyMODXselected', //MODX
           type: 'textbox',
           size: 40,
-          label: 'Text to display',
+          tooltip: tip ? tip : '',
+          label: title ? title : 'Text to display',
           onchange: function() {
             data.text = this.value();
           }
@@ -283,7 +295,7 @@ tinymce.PluginManager.add('modxMagicHoverLink', function(editor) {
           }
         };
       }
-      if (editor.settings.target_list !== false) {
+      if (editor.settings.target_list !== false && !editor.getParam("external_plugins",1).twExoticMarkdownEditor) {  //MODX
         if (!editor.settings.target_list) {
           editor.settings.target_list = [{
             text: 'None',
@@ -300,7 +312,7 @@ tinymce.PluginManager.add('modxMagicHoverLink', function(editor) {
           values: buildListItems(editor.settings.target_list)
         };
       }
-      if (editor.settings.rel_list) {
+      if (editor.settings.rel_list && !editor.getParam("external_plugins",1).twExoticMarkdownEditor) {  //MODX
         relListCtrl = {
           name: 'rel',
           type: 'listbox',
@@ -308,7 +320,7 @@ tinymce.PluginManager.add('modxMagicHoverLink', function(editor) {
           values: buildListItems(editor.settings.rel_list)
         };
       }
-      if (editor.settings.link_class_list) {
+      if (editor.settings.link_class_list && !editor.getParam("external_plugins",1).twExoticMarkdownEditor) { //MODX
         classListCtrl = {
           name: 'class',
           type: 'listbox',
@@ -334,18 +346,23 @@ tinymce.PluginManager.add('modxMagicHoverLink', function(editor) {
           value: data.title
         };
       }
+      if(editor.getParam("external_plugins",1).twExoticMarkdownEditor){
+        var title = "Insert Link / Image"
+      }
       win = editor.windowManager.open({
-        title: 'Insert link',
+        title: title ? title : "Insert Link",
         data: data,
+        minWdth: 450,
         onPostRender: function() {
           var thisAppendTo = $(".mce-foot > .mce-container-body.mce-abs-layout").attr('id')
           $(".mce-foot > .mce-container-body.mce-abs-layout").append("<div id='themChecks'></div>")
           tinymce.ui.Factory.create({
             type: 'button',
-            text: 'MODX Resources',
-            tooltip: 'Click to toggle activation. HOVER over any MODX Resource in Resource Tree, Search Result Tree and Link List.',
+            icon: 'fullpage',
+            // text: 'OPTIONS',
+            tooltip: 'Toggle. HOVER over any Resource in Resource Tree, Search Result Tree or Link List.',
             classes: 'useMODX',
-            active: true,
+            // active: true,
             style: 'position:absolute;top:10px;left:8px;',
             onPostRender: function() {
               $(".mce-useMODX").on("click", function() {
@@ -391,10 +408,58 @@ tinymce.PluginManager.add('modxMagicHoverLink', function(editor) {
           }).renderTo(document.getElementById(thisAppendTo));
           tinymce.ui.Factory.create({
             type: 'checkbox',
-            tooltip: 'Autofill URL?',
+            tooltip: 'Autofill URL? + scheme',
             checked: true,
             classes: 'themChecks themChecksURL',
             text: 'URL'
+          }).renderTo(document.getElementById('themChecks'));
+          tinymce.ui.Factory.create({
+            type: 'menubutton',
+            tooltip: 'Scheme Options',
+            classes: 'themChecks themChecksScMORE',
+            menu: [
+            {
+              text: 'Relative',
+              classes: 'themChecksMORErel',
+              onclick: function() {
+                  $(".mce-themChecksMORErel").parent().children().removeClass("mce-active");
+                  $(".mce-themChecksMORErel").addClass("mce-active");
+              }
+            },
+            {
+              text: 'Full',
+              classes: 'themChecksMOREfull',
+              onclick: function() {
+                  $(".mce-themChecksMOREfull").parent().children().removeClass("mce-active");
+                  $(".mce-themChecksMOREfull").addClass("mce-active").attr("scheme","full");
+              }
+            },
+            {
+              text: 'Absolute',
+              classes: 'themChecksMOREabs',
+              onclick: function() {
+                  $(".mce-themChecksMOREabs").parent().children().removeClass("mce-active");
+                  $(".mce-themChecksMOREabs").addClass("mce-active").attr("scheme","abs");
+              }
+            },
+            {
+              text: 'HTTP',
+              classes: 'themChecksMOREhttp',
+              onclick: function() {
+                  $(".mce-themChecksMOREhttp").parent().children().removeClass("mce-active");
+                  $(".mce-themChecksMOREhttp").addClass("mce-active").attr("scheme","http");
+              }
+            },
+            {
+              text: 'HTTPS',
+              classes: 'themChecksMOREhttps',
+              onclick: function() {
+                  $(".mce-themChecksMOREhttps").parent().children().removeClass("mce-active");
+                  $(".mce-themChecksMOREhttps").addClass("mce-active").attr("scheme","https");
+              }
+            },
+
+            ]
           }).renderTo(document.getElementById('themChecks'));
           if ($('.mce-tinyMODXselected').length) {
             tinymce.ui.Factory.create({
@@ -430,11 +495,18 @@ tinymce.PluginManager.add('modxMagicHoverLink', function(editor) {
               }
             }]
           }).renderTo(document.getElementById('themChecks'));
+          if(editor.getParam("external_plugins",1).twExoticMarkdownEditor){
+            tinymce.ui.Factory.create({
+              type: 'checkbox',
+              tooltip: 'Insert image instead',
+              classes: 'themChecks themChecksIMAGE',
+            }).renderTo(document.getElementById($(".mce-title").attr("id")));
+          }
         }, //MODX
         body: [{
             name: 'href',
             type: 'filepicker',
-            filetype: 'file',
+            filetype: 'file image media',
             size: 40,
             autofocus: true,
             label: 'Url',
@@ -488,7 +560,17 @@ tinymce.PluginManager.add('modxMagicHoverLink', function(editor) {
               editor.undoManager.add();
             } else {
               if (onlyText) {
-                editor.insertContent(dom.createHTML('a', linkAttrs, dom.encode(data.text)));
+                if(editor.getParam("external_plugins",1).twExoticMarkdownEditor){
+                  var image = "";
+                  if ($(".mce-themChecksIMAGE").attr("aria-checked") == "true") {
+                    var image = "!";
+                  }
+                  var title = linkAttrs.title ? ' "'+linkAttrs.title+'"' : '';
+                  editor.insertContent(image+'['+dom.encode(data.text).trim()+']('+linkAttrs.href+title+') '); //MODX (add .trim() to data.text)
+                }
+                else{
+                  editor.insertContent(dom.createHTML('a', linkAttrs, dom.encode(data.text)));
+                }
               } else {
                 editor.execCommand('mceInsertLink', false, linkAttrs);
               }
@@ -541,10 +623,30 @@ tinymce.PluginManager.add('modxMagicHoverLink', function(editor) {
         }
       })
     }
+  });
+  editor.on('DblClick', function(e) {
+    if (e.target.nodeName == 'IMG') {
+      // editor.windowManager.close();
+      editor.execCommand('mceImage', true);
+    }
+    if (e.target.nodeName == 'PRE') {
+      // editor.windowManager.close();
+      editor.execCommand('codesample', true);
+    }
+    if (e.target.nodeName == 'A') {
+      // editor.windowManager.close();
+      editor.execCommand('mceLink', true);
+    }
   }); //MODX
+  twExoticMarkdownEditorIcon = "link";
+  twExoticMarkdownEditorIText = "Insert/edit link";
+ if(editor.getParam("external_plugins",1).twExoticMarkdownEditor){
+    twExoticMarkdownEditorIcon = "browse";
+    twExoticMarkdownEditorIText = "Markdown Link/Image";
+  }
   editor.addButton('link', {
-    icon: 'link',
-    tooltip: 'Insert/edit link',
+    icon: twExoticMarkdownEditorIcon,
+    tooltip: twExoticMarkdownEditorIText,
     shortcut: 'Meta+K',
     onclick: createLinkList(showDialog),
     stateSelector: 'a[href]'
@@ -559,8 +661,8 @@ tinymce.PluginManager.add('modxMagicHoverLink', function(editor) {
   editor.addCommand('mceLink', createLinkList(showDialog));
   this.showDialog = showDialog;
   editor.addMenuItem('link', {
-    icon: 'link',
-    text: 'Insert/edit link',
+    icon: twExoticMarkdownEditorIcon,
+    text: twExoticMarkdownEditorIText,
     shortcut: 'Meta+K',
     onclick: createLinkList(showDialog),
     stateSelector: 'a[href]',
