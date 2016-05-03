@@ -22,9 +22,11 @@ USAGE
       modxMagicHoverLink: "[[++assets_url]]components/tinymcewrapper/tinymceplugins/modxMagicHoverLink.js"
       //twExoticMarkdownEditor: "[[++assets_url]]components/tinymcewrapper/tinymceplugins/twExoticMarkdownEditor.js" //works flawlessly with this plugin to output Markdown syntax
     },
+    modxMagicHoverLinkSettings: {
+      stripMODXurl:false, //default is true
+      addClassToTree:false //default is true
+    },
     toolbar: "link unlink",
-    //hoverStripMODXurl:false, //default is true
-    //hoverAddCLASStoTree:false //default is true
   });
 */
 var miniCSS = '<style id="modxMagicHoverLinkCSS">.moce-useMODX button{background-image: linear-gradient(to right,#3f4850 0,#365462 46%,#3e5554 60%,#42554d 68%,#573d4e 100%); box-shadow: 0 2px 0 #E4E4E4; color:white!important;}#themChecks{display:none;position:absolute;top:17px;left:60px}.mce-themChecks{display:inline;margin-left:8px !important;}.mce-themChecksMORE,.mce-themChecksScMORE{height: 23px !important;width: 20px!important;background: none!important;box-shadow: none!important;border: 0!important;margin-left: 0 !important;text-align: center!important;}.mce-themChecksMORE button,.mce-themChecksScMORE button{padding:0!important;}.twEasyHover{padding-top:20px!important;padding-bottom:20px!important;}.twEasyHover,.twEasyHover *{cursor:default!important;}.twEasyHover:before{content:"";position:absolute;width:100%;height:100%;}.mce-themChecksIMAGE{position:absolute!important;top:12px!important;z-index:2;}</style>';
@@ -34,14 +36,13 @@ if(!$("#modxMagicHoverLinkCSS").length){
 tinyMODXselectedID = false;
 $(document).on("mouseenter", "[ext\\:tree-node-id]", function() {
   if ($(".mce-useMODX").hasClass('useMODXyes')) { 
-    var twEasyHover = tinymce.activeEditor.getParam('hoverAddCLASStoTree', true);
     tinyMODXselectedTEXT = $(this).find("a > span").clone().children().remove().end().text().trim();
     tinyMODXselectedTITLE = $(this).find("a > span").clone().html($(this).find("a > span").attr('qtip')).text().trim();
     var tinyMODXselectedSCH = $("[class^=mce-themChecksMORE].mce-active").attr("scheme") ? '? &scheme=`'+$("[class^=mce-themChecksMORE].mce-active").attr("scheme")+'`' : '';
     tinyMODXselectedID = $(this).find("a > span > span").text().replace(/\D/g, '');
     if (tinyMODXselectedID && tinyMODXselectedTEXT) {
       if ($(".mce-themChecksURL").attr("aria-checked") == "true" || $(".mce-themChecksTXT").attr("aria-checked") == "true" || $(".mce-themChecksTITLE").attr("aria-checked") == "true") {
-        if(twEasyHover){
+        if(tinymce.activeEditor.getParam('modxMagicHoverLinkSettings',{}).addClassToTree !== false){
           $(this).addClass('twEasyHover');
         }
       }
@@ -258,7 +259,7 @@ tinymce.PluginManager.add('modxMagicHoverLink', function(editor) {
         data.title = value;
       }
       if (onlyText) {
-        if(editor.getParam("external_plugins",1).twExoticMarkdownEditor){
+        if(editor.getParam('twExoticMarkdownEditor', false)){
           var title = "Text"
           var tip = "Link Text or Image Description (ALT)"
         }
@@ -295,7 +296,7 @@ tinymce.PluginManager.add('modxMagicHoverLink', function(editor) {
           }
         };
       }
-      if (editor.settings.target_list !== false && !editor.getParam("external_plugins",1).twExoticMarkdownEditor) {  //MODX
+      if (editor.settings.target_list !== false && !editor.getParam('twExoticMarkdownEditor', false)) {  //MODX
         if (!editor.settings.target_list) {
           editor.settings.target_list = [{
             text: 'None',
@@ -312,7 +313,7 @@ tinymce.PluginManager.add('modxMagicHoverLink', function(editor) {
           values: buildListItems(editor.settings.target_list)
         };
       }
-      if (editor.settings.rel_list && !editor.getParam("external_plugins",1).twExoticMarkdownEditor) {  //MODX
+      if (editor.settings.rel_list && !editor.getParam('twExoticMarkdownEditor', false)) {  //MODX
         relListCtrl = {
           name: 'rel',
           type: 'listbox',
@@ -320,7 +321,7 @@ tinymce.PluginManager.add('modxMagicHoverLink', function(editor) {
           values: buildListItems(editor.settings.rel_list)
         };
       }
-      if (editor.settings.link_class_list && !editor.getParam("external_plugins",1).twExoticMarkdownEditor) { //MODX
+      if (editor.settings.link_class_list && !editor.getParam('twExoticMarkdownEditor', false)) { //MODX
         classListCtrl = {
           name: 'class',
           type: 'listbox',
@@ -346,7 +347,7 @@ tinymce.PluginManager.add('modxMagicHoverLink', function(editor) {
           value: data.title
         };
       }
-      if(editor.getParam("external_plugins",1).twExoticMarkdownEditor){
+      if(editor.getParam('twExoticMarkdownEditor', false)){
         var title = "Insert Link / Image"
       }
       win = editor.windowManager.open({
@@ -495,7 +496,7 @@ tinymce.PluginManager.add('modxMagicHoverLink', function(editor) {
               }
             }]
           }).renderTo(document.getElementById('themChecks'));
-          if(editor.getParam("external_plugins",1).twExoticMarkdownEditor){
+          if(editor.getParam('twExoticMarkdownEditor', false)){
             tinymce.ui.Factory.create({
               type: 'checkbox',
               tooltip: 'Insert image instead',
@@ -560,7 +561,7 @@ tinymce.PluginManager.add('modxMagicHoverLink', function(editor) {
               editor.undoManager.add();
             } else {
               if (onlyText) {
-                if(editor.getParam("external_plugins",1).twExoticMarkdownEditor){
+                if(editor.getParam('twExoticMarkdownEditor', false)){
                   var image = "";
                   if ($(".mce-themChecksIMAGE").attr("aria-checked") == "true") {
                     var image = "!";
@@ -608,8 +609,8 @@ tinymce.PluginManager.add('modxMagicHoverLink', function(editor) {
     }
   }
   editor.on('init change', function() { //MODX
-    var hoverStripMODXurl = editor.getParam("hoverStripMODXurl", true);
-    if(hoverStripMODXurl){
+    var hoverStripMODXurl = editor.getParam('modxMagicHoverLinkSettings',{}).stripMODXurl;
+    if(editor.getParam('modxMagicHoverLinkSettings',{}).stripMODXurl !== false){
       $(tinymce.activeEditor.getBody()).find("a").each(function() {
         var thisHref = $(this).attr('href');
         if (thisHref && thisHref.indexOf('[[~') > -1 && thisHref.indexOf(']]') > -1) {
@@ -625,22 +626,21 @@ tinymce.PluginManager.add('modxMagicHoverLink', function(editor) {
     }
   });
   editor.on('DblClick', function(e) {
-    if (e.target.nodeName == 'IMG') {
-      // editor.windowManager.close();
-      editor.execCommand('mceImage', true);
-    }
-    if (e.target.nodeName == 'PRE') {
-      // editor.windowManager.close();
-      editor.execCommand('codesample', true);
-    }
-    if (e.target.nodeName == 'A') {
-      // editor.windowManager.close();
-      editor.execCommand('mceLink', true);
+    if(!editor.getParam('tinymceBubbleBar', false)){
+      if (e.target.nodeName == 'IMG') {
+        // editor.windowManager.close();
+        editor.execCommand('mceImage', true);
+      }
+      if (e.target.nodeName == 'A') {
+        // editor.windowManager.close();
+        editor.execCommand('mceLink', true);
+        // console.log("a by magic");
+      }
     }
   }); //MODX
   twExoticMarkdownEditorIcon = "link";
   twExoticMarkdownEditorIText = "Insert/edit link";
- if(editor.getParam("external_plugins",1).twExoticMarkdownEditor){
+ if(editor.getParam('twExoticMarkdownEditor', false)){
     twExoticMarkdownEditorIcon = "browse";
     twExoticMarkdownEditorIText = "Markdown Link/Image";
   }
@@ -659,6 +659,7 @@ tinymce.PluginManager.add('modxMagicHoverLink', function(editor) {
   });
   editor.addShortcut('Meta+K', '', createLinkList(showDialog));
   editor.addCommand('mceLink', createLinkList(showDialog));
+  editor.addCommand('modxMagicHoverLink', createLinkList(showDialog)); //MODX
   this.showDialog = showDialog;
   editor.addMenuItem('link', {
     icon: twExoticMarkdownEditorIcon,
