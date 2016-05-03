@@ -11,14 +11,17 @@ Insert MODX internal links with scheme (abs, relative, http, https)
 
 #Usage
 ```html
-  tinymce.init({
-    external_plugins: {
-      modxMagicHoverLink: "[[++assets_url]]components/tinymcewrapper/tinymceplugins/modxMagicHoverLink.js"
-    },
-    toolbar: "link unlink",
-    //hoverStripMODXurl:false, //default is true
-    //hoverAddCLASStoTree:false //default is true
-  });
+tinymce.init({
+  external_plugins: {
+    modxMagicHoverLink: "[[++assets_url]]components/tinymcewrapper/tinymceplugins/modxMagicHoverLink.js"
+    //twExoticMarkdownEditor: "[[++assets_url]]components/tinymcewrapper/tinymceplugins/twExoticMarkdownEditor.js" //works flawlessly with this plugin to output Markdown syntax
+  },
+  modxMagicHoverLinkSettings: {
+    stripMODXurl:false, //default is true
+    addClassToTree:false //default is true
+  },
+  toolbar: "link unlink",
+});
   ```
   In `TinymceWrapper`, to affect all editors at once, call `external_plugins: {...` in your `TinymceWrapperCommonCode` chunk.<br> Or else, make the call in your individual init chunks.
 
