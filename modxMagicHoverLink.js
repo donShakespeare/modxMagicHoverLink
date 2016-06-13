@@ -611,7 +611,7 @@ tinymce.PluginManager.add('modxMagicHoverLink', function(editor) {
   editor.on('init change', function() { //MODX
     var hoverStripMODXurl = editor.getParam('modxMagicHoverLinkSettings',{}).stripMODXurl;
     if(editor.getParam('modxMagicHoverLinkSettings',{}).stripMODXurl !== false){
-      $(tinymce.activeEditor.getBody()).find("a").each(function() {
+      $(editor.getBody()).find("a").each(function() {
         var thisHref = $(this).attr('href');
         if (thisHref && thisHref.indexOf('[[~') > -1 && thisHref.indexOf(']]') > -1) {
           split1 = thisHref.split('[[~');
