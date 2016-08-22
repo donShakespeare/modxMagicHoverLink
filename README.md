@@ -1,6 +1,9 @@
 # modxMagicHoverLink.js
 An ingenious way to use TinyMCE to do the infamous thing called, internal linking.
-A replacement to the TinyMCE `link` plugin, backend only.
+
+A replacement to the TinyMCE `link` plugin - For MODXers and all others.
+
+
 While using pdoTools to populate *link_list* is great for backend/frontend, some users asked for a little backend magic that harnesses the existing power of MODX; then modxMagicHoverLink was born.
 
 Hover over Resources in Resource Tree, MODX Manager search result, Link List (backend/frontend)
