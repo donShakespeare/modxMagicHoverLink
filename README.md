@@ -21,7 +21,8 @@ tinymce.init({
   },
   modxMagicHoverLinkSettings: {
     stripMODXurl:false, //default is true
-    addClassToTree:false //default is true
+    addClassToTree:false, //default is true
+    markdownImagePersist:true //default is false
   },
   toolbar: "link unlink",
 });
