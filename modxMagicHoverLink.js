@@ -24,7 +24,8 @@ USAGE
     },
     modxMagicHoverLinkSettings: {
       stripMODXurl:false, //default is true
-      addClassToTree:false //default is true
+      addClassToTree:false, //default is true
+      markdownImagePersist:true, //default is false
     },
     toolbar: "link unlink",
   });
@@ -497,9 +498,14 @@ tinymce.PluginManager.add('modxMagicHoverLink', function(editor) {
             }]
           }).renderTo(document.getElementById('themChecks'));
           if(editor.getParam('twExoticMarkdownEditor', false)){
+            var checkChecked = false;
+            if(editor.getParam('modxMagicHoverLinkSettings',{}).markdownImagePersist){
+              checkChecked = true;
+            }
             tinymce.ui.Factory.create({
               type: 'checkbox',
               tooltip: 'Insert image instead',
+              checked: checkChecked,
               classes: 'themChecks themChecksIMAGE',
             }).renderTo(document.getElementById($(".mce-title").attr("id")));
           }
